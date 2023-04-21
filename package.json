@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@ts.adligo.org/i_io": "^0.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "lockfileVersion": 3,
+  "main": "dist/paths",
+  "name": "@ts.adligo.org/paths",
+  "packages": {
+    "": {
+      "name": "@ts.adligo.org/paths",
+      "license": "Apache-2.0",
+      "devDependencies": {
+        "typescript": "^5.0.4"
+      }
+    }
+  },
+  "scripts": {
+    "tsc": "tsc"
+  },
+  "type": "module",
+  "types": "src/paths.mts",
+  "version": "0.0.1"
+}

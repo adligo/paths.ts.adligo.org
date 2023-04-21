@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "rootDirs": ["./src", "./tests"],
+    "preserveConstEnums": true,
+    "sourceMap": true
+  },
+  "files": ["./src/paths.mts"],
+  "exclude": ["node_modules"]
+}
