@@ -3,6 +3,7 @@
     "@ts.adligo.org/i_io": "^0.0.1"
   },
   "devDependencies": {
+    "@types/node": "^18.15.12",
     "typescript": "^5.0.4"
   },
   "lockfileVersion": 3,
