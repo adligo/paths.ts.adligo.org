@@ -1,13 +1,15 @@
 {
-  "exclude": ["node_modules"],
+  "exclude": ["dist", "lib", "node_modules"],
   "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
     "experimentalDecorators": true,
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noImplicitAny": true,
     "outDir": "./dist",
-    "rootDirs": ["./src", "./tests"],
+    "rootDirs": ["./src"],
     "preserveConstEnums": true,
     "sourceMap": true
   },
@@ -15,7 +17,7 @@
   "ts-node": {
     "esm": true,
     "compilerOptions": {
-      "module": "NodeNext",
+      "module": "NodeNext"
     }
   }
 }

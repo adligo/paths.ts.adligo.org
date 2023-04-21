@@ -4,10 +4,16 @@
   },
   "devDependencies": {
     "@types/node": "^18.15.12",
+    "gulp": "^4.0.2",
     "typescript": "^5.0.4"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/paths.mjs"
+    }
+  },
   "lockfileVersion": 3,
-  "main": "dist/paths",
+  "main": "./dist/paths",
   "name": "@ts.adligo.org/paths",
   "packages": {
     "": {
@@ -32,6 +38,6 @@
     "tsc": "tsc"
   },
   "type": "module",
-  "types": "src/paths.mts",
+  "types": "./src/paths.mts",
   "version": "0.0.3"
 }
