@@ -1,4 +1,5 @@
 {
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "experimentalDecorators": true,
     "target": "ES2022",
@@ -11,5 +12,10 @@
     "sourceMap": true
   },
   "files": ["./src/paths.mts"],
-  "exclude": ["node_modules"]
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "NodeNext",
+    }
+  }
 }

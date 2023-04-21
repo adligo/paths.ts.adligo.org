@@ -25,9 +25,10 @@ function isWindows() {
 }
 const IS_WINDOWS = isWindows();
 
-export const SMALL_PATH_ERROR  ="Unable to parse paths of length 3 or smaller!";
-export const NON_UNIX_PATH_ERROR = "The following unixPath is not a fully qualified path!;\n";
+
 export class Paths {
+    static SMALL_PATH_ERROR  ="Unable to parse paths of length 3 or smaller!";
+    static NON_UNIX_PATH_ERROR = "The following unixPath is not a fully qualified path!;\n";
     /**
      * 
      * @param path a fully qualified path
@@ -51,7 +52,7 @@ export class Paths {
           return path;
         }
       } else {
-        throw Error(SMALL_PATH_ERROR);
+        throw Error(Paths.SMALL_PATH_ERROR);
       }
       return r;
     }
@@ -99,7 +100,7 @@ export class Paths {
       let b = '';
       var j = 0;
       if (unixPath.charAt(0) != '/') {
-        throw Error(NON_UNIX_PATH_ERROR + unixPath);
+        throw Error(Paths.NON_UNIX_PATH_ERROR + unixPath);
       }
       for (var i=1; i< unixPath.length; i++) {
         let c = unixPath[i];
