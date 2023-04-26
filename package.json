@@ -2,6 +2,9 @@
   "compilerOptions": {
     "module": "nodenext"
   },
+  "dependencySrcSLinks": [{
+    "project": "i_paths.ts.adligo.org" 
+  }],
   "devDependencies": {
     "@types/node": "^18.15.12",
     "gulp": "^4.0.2",

@@ -14,107 +14,144 @@
   * limitations under the License.
   */
 
-function isWindows() {
-  let osString: string = process.platform;
-  if (osString == "win32") {
-    return true;
-  } else if (osString == "win64") {
-    return true;
+import { I_Path, I_Paths } from './i_paths.ts.adligo.org@slink/i_paths.mjs';
+
+
+export class Path implements I_Path {
+  private relative: boolean;
+  private parts: string[];
+  private windows: boolean;
+
+  constructor(parts: string[], relative?: boolean, windows?: boolean) {
+    if (relative == undefined) {
+      this.relative = false;
+    } else {
+      this.relative = relative;
+    }
+    this.parts = parts;
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] == undefined) {
+        throw Error('Parts must have valid strings! ' + parts);
+      }
+    }
+    if (windows == undefined) {
+      this.windows = false;
+    } else {
+      this.windows = windows;
+    }
   }
-  return false;
+
+  isRelative(): boolean  { return this.relative; }
+  isWindows(): boolean { return this.windows; }
+  getParts(): string[] { return this.parts.slice(0, this.parts.length ); }
+  toString(): string { return 'Path [parts=' + this.parts + ', relative=' + this.relative + ', windows=' + this.windows + ']'}
+  toPathString(): string {
+    var r : string = '';
+    if  (this.windows) {
+      if (this.relative) {
+        r = r.concat(this.parts[0] + '\\');
+        return this.concat(r, '\\');
+      } else {
+        r = r.concat(this.parts[0] + ':\\');
+        return this.concat(r, '\\');
+      }
+    } else {
+      if (this.relative) {
+        return this.concat(r, '/');
+      } else {
+        r = r.concat('/');
+        return this.concat(r, '/');
+      }
+    }
+  }
+
+  toUnix(path: I_Path): I_Path {
+    return new Path(path.getParts(), path.isRelative(), false);
+  }
+
+  toWindows(path: I_Path): I_Path {
+    return new Path(path.getParts(), path.isRelative(), true);
+  }
+
+  private concat(start: string, sep: string ): string {
+    for (var i = 1; i < this.parts.length; i++) {
+      if (this.parts.length -1 == i) {
+        start = start.concat(this.parts[i]);
+      } else {
+        start = start.concat(this.parts[i]).concat(sep);
+      }
+    }
+    return start;
+  }
 }
-const IS_WINDOWS = isWindows();
 
-
-export class Paths {
-  static SMALL_PATH_ERROR  ="Unable to parse paths of length 3 or smaller!";
+export class Paths implements I_Paths {
+  static INVALID_PATH_STRING = "Invalid path string; ";
   static NON_UNIX_PATH_ERROR = "The following unixPath is not a fully qualified path!;\n";
+  static SMALL_PATH_ERROR  ="Unable to parse paths of length 3 or smaller!";
+  static SPACES_NOT_ALLOWED_ERROR = "Spaces are NOT allowed in Paths! ";
+
+  private windows: boolean;
+
+  constructor(isWindows: boolean) {
+    this.windows = isWindows;
+  }
+
   /**
    * 
-   * @param path a fully qualified path
-   * @returns 
+   * @param path a relative or absolute path
    */
-  static toUnix(path: string): string {
-    var r = '';
-    if (path.length > 3) {
-      if (path.charAt(1) == ':') {
-        r = '/c/';
-        for (var i=3; i< path.length; i++) {
-          let c = path[i];
-          if (c == '\\') {
-            r = r.concat('/');
-          } else {
-            r = r.concat(c);
-          }
-        }
-      } else {
-        //assume unix path already!
-        return path;
-      }
-    } else {
-      throw Error(Paths.SMALL_PATH_ERROR);
+  normalize(path: string): I_Path {
+    if (path == undefined || path.length == 0) {
+      throw Error("Invalid path string; " + path);
     }
-    return r;
-  }
-
-  static toUnixPath(parts: string[]): string {
-    let b = '/';
-    for (var i=0; i < parts.length; i++) {
-      if (i == parts.length - 1) {
-        b = b.concat(parts[i]);
-      } else {
-        b = b.concat(parts[i]).concat('/');
-      }
-    }
-    return b;
-  }
-
-  static toWindowsPath(parts: string[]): string {
-    let b = '';
-    for (var i=0; i < parts.length; i++) {
-      if (i == 0) {
-        b = parts[0].toUpperCase() + ':\\';
-      } else if (i == parts.length -1) {
-        b = b.concat(parts[i]);
-      } else {
-        b = b.concat(parts[i]).concat('\\');
-      }
-    }
-    return b;
-  }
-
-  static toOsPath(path: string): string {
-    let parts = this.toParts(path);
-    if (IS_WINDOWS) {
-      return this.toWindowsPath(parts);
-    } else {
-      return this.toUnixPath(parts);
-    }
-  }
-  /**
-   * 
-   * @param unixPath a fully qualified path
-   */
-  static toParts(unixPath: string): string[] {
     let r: string[] = new Array();
     let b = '';
     var j = 0;
-    if (unixPath.charAt(0) != '/') {
-      throw Error(Paths.NON_UNIX_PATH_ERROR + unixPath);
-    }
-    for (var i=1; i< unixPath.length; i++) {
-      let c = unixPath[i];
+    for (var i=1; i< path.length; i++) {
+      let c = path[i];
       if (c == '/') {
         if (b.length != 0) {
           r[j] = b;
           b = '';
           j++;
         }
+      } else if (c == '\\') {
+        if (b.length != 0) {
+          r[j] = b;
+          b = '';
+          j++;
+        }
+      } else if (c == ' ') {
+        throw Error(Paths.SPACES_NOT_ALLOWED_ERROR + path);
       } else {
         b = b.concat(c);
       }
     }
     r[j] = b;
-    return r;
+    let fr = (ca: string) => {
+      switch (ca) {
+        case '/': return new Path(r, true, false); 
+        default: return new Path(r, true, true);
+      }
+    }
+    if (path.length >= 2) {
+      switch(r[0]) {
+        case '.': return fr.apply(path.charAt(1));
+        case '..': return fr.apply(path.charAt(2));
+        default:
+          if (path.charAt(1) == ':') {
+            return new Path(r, false, true); 
+          }
+          return new Path(r, false, false); 
+      }
+    } else {
+      switch (path.charAt(0)) {
+        case '/': return new Path(r, false, false); 
+        case '\\': return new Path(r, false, true);
+        // the '.' case and others it doesn't matter if it's windows at this point 
+        default: return new Path(r, true, false); 
+      }
+    }
   }
 }
