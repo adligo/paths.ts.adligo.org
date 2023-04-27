@@ -41,6 +41,36 @@ export class Path implements I_Path {
     }
   }
 
+  equals(obj: any) : boolean {
+    let other: I_Path = obj as I_Path;
+    if (other.isRelative == undefined) {
+      return false;
+    } else if (other.isRelative() != this.isRelative()) {
+      return false;
+    }
+
+    if (other.isWindows == undefined) {
+      return false;
+    } else if (other.isWindows() != this.isWindows()) {
+      return false;
+    }
+
+    if (other.getParts == undefined) {
+      return false;
+    } else {
+      let op: string [] = other.getParts();
+      if (op.length != this.parts.length) {
+        return false;
+      }
+      for (var i =0; i< this.parts.length; i++) {
+        if (op[i] != this.parts[i]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   isRelative(): boolean  { return this.relative; }
   isWindows(): boolean { return this.windows; }
   getParts(): string[] { return this.parts.slice(0, this.parts.length ); }
@@ -74,7 +104,7 @@ export class Path implements I_Path {
   }
 
   private concat(start: string, sep: string ): string {
-    for (var i = 1; i < this.parts.length; i++) {
+    for (var i = 0; i < this.parts.length; i++) {
       if (this.parts.length -1 == i) {
         start = start.concat(this.parts[i]);
       } else {
@@ -90,12 +120,6 @@ export class Paths implements I_Paths {
   static NON_UNIX_PATH_ERROR = "The following unixPath is not a fully qualified path!;\n";
   static SMALL_PATH_ERROR  ="Unable to parse paths of length 3 or smaller!";
   static SPACES_NOT_ALLOWED_ERROR = "Spaces are NOT allowed in Paths! ";
-
-  private windows: boolean;
-
-  constructor(isWindows: boolean) {
-    this.windows = isWindows;
-  }
 
   /**
    * 
@@ -129,16 +153,10 @@ export class Paths implements I_Paths {
       }
     }
     r[j] = b;
-    let fr = (ca: string) => {
-      switch (ca) {
-        case '/': return new Path(r, true, false); 
-        default: return new Path(r, true, true);
-      }
-    }
     if (path.length >= 2) {
       switch(r[0]) {
-        case '.': return fr.apply(path.charAt(1));
-        case '..': return fr.apply(path.charAt(2));
+        case '.': return this.toPath(r, path.charAt(1));
+        case '..': return this.toPath(r, path.charAt(2));
         default:
           if (path.charAt(1) == ':') {
             return new Path(r, false, true); 
@@ -149,9 +167,16 @@ export class Paths implements I_Paths {
       switch (path.charAt(0)) {
         case '/': return new Path(r, false, false); 
         case '\\': return new Path(r, false, true);
-        // the '.' case and others it doesn't matter if it's windows at this point 
+        // the '.' case and others
         default: return new Path(r, true, false); 
       }
     }
   }
+
+  private toPath(parts: string[], firstPathChar: string) : I_Path {
+    switch (firstPathChar) {
+      case '/': return new Path(parts, true, true); 
+      default: return new Path(parts, true, true);
+    }
+  } 
 }
