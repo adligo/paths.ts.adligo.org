@@ -104,7 +104,11 @@ export class Path implements I_Path {
   }
 
   private concat(start: string, sep: string ): string {
-    for (var i = 0; i < this.parts.length; i++) {
+    var i = 0;
+    if (this.isWindows()) {
+      i = 1;
+    }
+    for (; i < this.parts.length; i++) {
       if (this.parts.length -1 == i) {
         start = start.concat(this.parts[i]);
       } else {
@@ -131,8 +135,18 @@ export class Paths implements I_Paths {
     }
     let r: string[] = new Array();
     let b = '';
+    var i=0; 
     var j = 0;
-    for (var i=1; i< path.length; i++) {
+    var windowsColon: boolean = false;
+    if (path.length >= 2) {
+      if (path.charAt(1) == ':') {
+        windowsColon = true;
+        r[0] = path.charAt(0);
+        i = 2;
+        j = 1;
+      }
+    }
+    for (;i< path.length; i++) {
       let c = path[i];
       if (c == '/') {
         if (b.length != 0) {
@@ -155,8 +169,8 @@ export class Paths implements I_Paths {
     r[j] = b;
     if (path.length >= 2) {
       switch(r[0]) {
-        case '.': return this.toPath(r, path.charAt(1));
-        case '..': return this.toPath(r, path.charAt(2));
+        case '.': return this.toPath(r, path.charAt(1), windowsColon);
+        case '..': return this.toPath(r, path.charAt(2), windowsColon);
         default:
           if (path.charAt(1) == ':') {
             return new Path(r, false, true); 
@@ -173,10 +187,18 @@ export class Paths implements I_Paths {
     }
   }
 
-  private toPath(parts: string[], firstPathChar: string) : I_Path {
-    switch (firstPathChar) {
-      case '/': return new Path(parts, true, true); 
-      default: return new Path(parts, true, true);
+  private toPath(parts: string[], firstPathChar: string, windowsColon: boolean) : I_Path {
+    if (windowsColon) {
+      switch (firstPathChar) {
+        case '/': return new Path(parts, true, true); 
+        default: return new Path(parts, true, true);
+      }
+    } else {
+      switch (firstPathChar) {
+        case '/': return new Path(parts, true, false); 
+        default: return new Path(parts, true, true);
+      }
     }
+
   } 
 }
